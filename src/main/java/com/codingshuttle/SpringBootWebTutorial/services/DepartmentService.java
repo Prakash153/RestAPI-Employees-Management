@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,9 +22,12 @@ public class DepartmentService {
     @Autowired
     ModelMapper modelMapper;
 
-    public DepartmentDTO getDepartmentById(Long id) {
-        DepartmentEntity departmentEntity = departmentRepository.findById(id).orElse(null);
-        return modelMapper.map(departmentEntity, DepartmentDTO.class);
+    public Optional<DepartmentDTO> getDepartmentById(Long id) {
+//        model mapper won't work on optional data ' so we need to map it into normal data
+//        findById method return optional data
+        Optional<DepartmentEntity> departmentEntity = departmentRepository.findById(id);
+
+         return departmentEntity.map(departmentEntity1 -> modelMapper.map(departmentEntity1,DepartmentDTO.class));
 
     }
 
@@ -50,11 +54,7 @@ public class DepartmentService {
         return modelMapper.map(departmentEntity, DepartmentDTO.class);
     }
 
-    public void checkDepartmentExist(Long departmentId) {
-        boolean exist = departmentRepository.existsById(departmentId);
-        if (!exist) throw new ResourceNotFoundException("Department Not found with id: " + departmentId);
 
-    }
 
     public DepartmentDTO updateDepartmentPartially(Map<String, Object> updates, Long id) {
         checkDepartmentExist(id);
@@ -72,5 +72,10 @@ public class DepartmentService {
         checkDepartmentExist(id);
          departmentRepository.deleteById(id);
          return true;
+    }
+    public void checkDepartmentExist(Long departmentId) {
+        boolean exist = departmentRepository.existsById(departmentId);
+        if (!exist) throw new ResourceNotFoundException("Department Not found with id: " + departmentId);
+
     }
 }

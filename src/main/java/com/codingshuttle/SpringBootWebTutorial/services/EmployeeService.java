@@ -29,24 +29,27 @@ public class EmployeeService {
 
     public void checkEmployeeExist(Long employeeId) {
         boolean exist = employeeRepository.existsById(employeeId);
-        if(!exist)   throw new ResourceNotFoundException("Employee Not found with id: "+ employeeId);
+        if (!exist) throw new ResourceNotFoundException("Employee Not found with id: " + employeeId);
 
     }
     // we are using model mapper maven dependency to convert one class object to other
     // that is employee entity to employeeDTO
 
 
-    public Optional<EmployeeDTO > getEmployeeById(Long id) {
+    public Optional<EmployeeDTO> getEmployeeById(Long id) {
 //       Optional <EmployeeEntity employeeEntity = employeeRepository.findById(id) ;
         // since we do not want to create object again ,and again we would inject a bean from config folder,
 //        ModelMapper mapper = new ModelMapper();
-        return employeeRepository.findById(id).map(employeeEntity -> modelMapper.map(employeeEntity,EmployeeDTO.class));
+        return employeeRepository.findById(id).map(employeeEntity -> modelMapper.map(employeeEntity, EmployeeDTO.class));
     }
 
     public List<EmployeeDTO> getAllEmployee() {
         List<EmployeeEntity> employeeEntities = employeeRepository.findAll();
 //        since it is a list we need a stream library to convert each entity to dto
-        return employeeEntities.stream().map(employeeEntity -> modelMapper.map(employeeEntity, EmployeeDTO.class)).collect(Collectors.toList());
+        return employeeEntities
+                .stream()
+                .map(employeeEntity -> modelMapper.map(employeeEntity, EmployeeDTO.class))
+                .collect(Collectors.toList());
 
     }
 
@@ -57,14 +60,13 @@ public class EmployeeService {
     }
 
     public EmployeeDTO updateEmployeeById(Long employeeId, EmployeeDTO employeeDTO) {
-      checkEmployeeExist(employeeId);
+        checkEmployeeExist(employeeId);
 
         EmployeeEntity employeeEntity = modelMapper.map(employeeDTO, EmployeeEntity.class);
         employeeEntity.setId(employeeId);
         EmployeeEntity saveEmployee = employeeRepository.save(employeeEntity);
         return modelMapper.map(employeeEntity, EmployeeDTO.class);
     }
-
 
 
     public boolean deleteEmployeeById(Long employeeId) {
@@ -81,13 +83,13 @@ public class EmployeeService {
         checkEmployeeExist(employeeId);
 
         EmployeeEntity employeeEntity = employeeRepository.findById(employeeId).get();
-        updates.forEach((field,value) ->{
-             Field fieldToBeUpdated = ReflectionUtils.findRequiredField(EmployeeEntity.class,field);
-       // because fields are private
-             fieldToBeUpdated.setAccessible(true);
-       ReflectionUtils.setField(fieldToBeUpdated,employeeEntity,value);
+        updates.forEach((field, value) -> {
+            Field fieldToBeUpdated = ReflectionUtils.findRequiredField(EmployeeEntity.class, field);
+            // because fields are private
+            fieldToBeUpdated.setAccessible(true);
+            ReflectionUtils.setField(fieldToBeUpdated, employeeEntity, value);
         });
 
-        return modelMapper.map( employeeRepository.save(employeeEntity),EmployeeDTO.class);
+        return modelMapper.map(employeeRepository.save(employeeEntity), EmployeeDTO.class);
     }
 }
