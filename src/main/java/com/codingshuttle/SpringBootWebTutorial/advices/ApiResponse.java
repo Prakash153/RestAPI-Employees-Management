@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 
 @Data
 public class ApiResponse<T> {
+
   @JsonFormat(pattern = "hh-mm-ss dd-MM-yyyy")
     private LocalDateTime timeStamp;
 //    response can either be data field or error
